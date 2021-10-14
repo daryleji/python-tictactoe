@@ -7,8 +7,9 @@ import sys
 import numpy as np
 
 # GLOBAL VARIABLES
-DISPLAY_WIDTH = 800
-DISPLAY_HEIGHT = 800
+WINDOW_SIZE = 800
+DISPLAY_WIDTH = WINDOW_SIZE
+DISPLAY_HEIGHT = WINDOW_SIZE
 BOARD_ROWS = 3
 BOARD_COLUMNS = 3
 x_segment = DISPLAY_WIDTH / BOARD_COLUMNS
@@ -64,20 +65,21 @@ def is_board_full() -> bool:
 
 # Function to draw the figure depending on the player
 def draw_figures() -> None:
-    CIRCLE_RADIUS = 60
-    CIRCLE_WIDTH = 15
-    CROSS_WIDTH = 25
+    CIRCLE_RADIUS = int(min(x_segment, y_segment) * 0.3)
+    CIRCLE_WIDTH = int(min(x_segment, y_segment) * 0.075)
+    CROSS_WIDTH = int(x_segment//8)
+    y_offset = int(x_segment//4)
+    x_offset = int(y_segment//4)
 
     for col in range(BOARD_ROWS):
         for row in range(BOARD_COLUMNS):
             row_p = int(row * y_segment)
             col_p = int(col * x_segment)
             if board[col][row] == 1:
-                pygame.draw.circle(window, PLAYER_ONE_COLOR, (col_p + int(x_segment//2), row_p + int(y_segment//2))
-                                   , CIRCLE_RADIUS, CIRCLE_WIDTH)
+                pygame.draw.circle(window, PLAYER_ONE_COLOR, (int(col_p + x_segment//2), int(row_p + y_segment//2)), CIRCLE_RADIUS, CIRCLE_WIDTH)
             elif board[col][row] == 2:
-                pygame.draw.line(window, PLAYER_TWO_COLOR, (col_p + 50, row_p + 50), (col_p + (x_segment-50), row_p + (y_segment-50)), CROSS_WIDTH)
-                pygame.draw.line(window, PLAYER_TWO_COLOR, (col_p + (x_segment-50), row_p + 50), (col_p + 50, row_p + (y_segment-50)), CROSS_WIDTH)
+                pygame.draw.line(window, PLAYER_TWO_COLOR, (col_p + x_offset, row_p + y_offset), (col_p + (x_segment - x_offset), row_p + (y_segment - y_offset)), CROSS_WIDTH)
+                pygame.draw.line(window, PLAYER_TWO_COLOR, (col_p + (x_segment - x_offset), row_p + y_offset), (col_p + x_offset, row_p + (y_segment - y_offset)), CROSS_WIDTH)
 
 
 # Checking win conditions, made to work with variable grid sizes greater than the standard 3x3
@@ -170,16 +172,10 @@ def main():
                 square_col = int(mouse_x_pos // y_segment)
 
                 if available_square(square_col, square_row):
-                    if player == 1:
-                        mark_square(square_col, square_row, 1)
-                        if check_win(player):
-                            game_over = True
-                        player = 2
-                    elif player == 2:
-                        mark_square(square_col, square_row, 2)
-                        if check_win(player):
-                            game_over = True
-                        player = 1
+                    mark_square(square_col, square_row, player)
+                    if check_win(player):
+                        game_over = True
+                    player = player % 2 + 1
 
                     draw_figures()
 
